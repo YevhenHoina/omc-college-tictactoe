@@ -1,5 +1,9 @@
-let arrayOfActions = []
+window.localStorage.setItem('arrayOfActions', null);
+window.localStorage.setItem('position', '0');
+
 document.body.addEventListener('click', function (event) {
+    let position = JSON.parse(window.localStorage.getItem('position'));
+    let arrayOfActions = (window.localStorage.getItem('arrayOfActions')).split(','); //suka
     if (event.target.classList.contains('cell')) {
         if (arrayOfActions.length % 2 === 0) {
             event.target.classList.add('ch');
@@ -13,17 +17,29 @@ document.body.addEventListener('click', function (event) {
             (Vertical(i));
             (Horizontal(i));
         }
-        arrayOfActions.push(event.target);
+        console.log(position)
+        arrayOfActions.push(event.target.id);
         document.body.querySelector(`[class*='undo-btn btn']`).removeAttribute('disabled');
+        arrayOfActions.slice(position, arrayOfActions.length)
+        console.log('click before: ', position)
+        ++position;
+        window.localStorage.setItem('position', position);
+        console.log('click after: ', position);
+        window.localStorage.setItem('arrayOfActions', arrayOfActions)
     }
 })
-//smth wrong
 document.body.querySelector(`[class*='undo-btn btn']`).addEventListener('click', function () {
-    let victimCell = arrayOfActions[arrayOfActions.length - 1];
+    let arrayOfActions = (window.localStorage.getItem('arrayOfActions')).split(',');
+    let position = JSON.parse(window.localStorage.getItem('position'));
+    let victimCell = document.body.querySelector(`#${arrayOfActions[position]}`);
     victimCell.classList.remove('ch', 'r');
-    if (arrayOfActions.length === 0) {
+    if (position === 0) {
         document.body.querySelector(`[class*='undo-btn btn']`).setAttribute('disabled', 'disabled');
     }
+    document.body.querySelector(`[class*='redo-btn btn']`).removeAttribute('disabled');
+    --position;
+    window.localStorage.setItem('position', position);
+    console.log('undo: ', position);
 })
 
 function DiagonalRight() {
@@ -40,8 +56,12 @@ function DiagonalRight() {
     }
     for (let i = 0; i < COLS_COUNT; i++) {
         winCell = document.body.querySelector(`#c-${(COLS_COUNT + 1) * i}`);
-        winCell.classList.add('win', ' diagonal-right');
+        winCell.classList.add('win', 'diagonal-right');
     }
+    document.body.querySelector(`[class*='won-title']`).classList.remove('hidden');
+    document.body.querySelector(`[class*='won-message']`).innerHTML = firstCell.classList.contains('r') ?
+        'Toes won!' :
+        'Croses won!';
     return true;
 }
 
@@ -61,6 +81,10 @@ function DiagonalLeft() {
         anyCell = document.body.querySelector(`#c-${(COLS_COUNT - 1) * i}`);
         anyCell.classList.add('win', 'diagonal-left');
     }
+    document.body.querySelector(`[class*='won-title']`).classList.remove('hidden');
+    document.body.querySelector(`[class*='won-message']`).innerHTML = firstCell.classList.contains('r') ?
+        'Toes won!' :
+        'Croses won!';
     return true;
 }
 
@@ -81,6 +105,10 @@ function Vertical(id) {
         anyCell = document.body.querySelector(`#c-${COLS_COUNT * i + id}`);
         anyCell.classList.add('win', 'vertical');
     }
+    document.body.querySelector(`[class*='won-title']`).classList.remove('hidden');
+    document.body.querySelector(`[class*='won-message']`).innerHTML = firstCell.classList.contains('r') ?
+        'Toes won!' :
+        'Croses won!';
     return true;
 }
 
@@ -99,5 +127,9 @@ function Horizontal(id) {
         anyCell = document.body.querySelector(`#c-${id * COLS_COUNT + i}`);
         anyCell.classList.add('win', 'horizontal')
     }
+    document.body.querySelector(`[class*='won-title']`).classList.remove('hidden');
+    document.body.querySelector(`[class*='won-message']`).innerHTML = firstCell.classList.contains('r') ?
+        'Toes won!' :
+        'Croses won!';
     return true;
 }
